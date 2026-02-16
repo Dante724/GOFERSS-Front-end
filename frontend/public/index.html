@@ -2,38 +2,101 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wegofers</title>
 
-    <title>Wegofers</title>
+<style>
+
+/* iOS Glass Instagram Button */
+.insta-glass {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+
+    width: 65px;
+    height: 65px;
+    border-radius: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Glass effect */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    border: 1px solid rgba(255,255,255,0.3);
+
+    /* Premium shadow */
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.25),
+        inset 0 1px 1px rgba(255,255,255,0.2);
+
+    cursor: pointer;
+
+    transition: all 0.35s ease;
+}
+
+/* Hover animation */
+.insta-glass:hover {
+    transform: scale(1.12) translateY(-3px);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,0.35),
+        inset 0 1px 2px rgba(255,255,255,0.3);
+}
+
+/* Click animation */
+.insta-glass:active {
+    transform: scale(0.95);
+}
+
+/* Instagram gradient background inside */
+.insta-inner {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: radial-gradient(circle at 30% 107%, 
+        #fdf497 0%, 
+        #fd5949 45%, 
+        #d6249f 60%, 
+        #285AEB 90%);
+}
+
+/* Instagram icon */
+.insta-inner svg {
+    width: 22px;
+    height: 22px;
+    fill: white;
+}
+
+</style>
 
 </head>
 
 <body>
 
-    <!-- Your website root -->
-    <div id="root"></div>
+<div id="root"></div>
 
+<!-- iOS Premium Instagram Button -->
+<a href="https://www.instagram.com/wegofers/" target="_blank" class="insta-glass">
 
-    <!-- Instagram direct open button -->
-    <a href="https://www.instagram.com/wegofers/" target="_blank">
+    <div class="insta-inner">
 
-        <img 
-            src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
-            alt="Follow us on Instagram"
-            style="
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 50px;
-                height: 50px;
-                cursor: pointer;
-                z-index: 9999;
-            "
-        >
+        <svg viewBox="0 0 24 24">
+            <path d="M7.75 2C4.678 2 2 4.678 2 7.75v8.5C2 19.322 4.678 22 7.75 22h8.5C19.322 22 22 19.322 22 16.25v-8.5C22 4.678 19.322 2 16.25 2h-8.5zm0 2h8.5C18.216 4 20 5.784 20 7.75v8.5c0 1.966-1.784 3.75-3.75 3.75h-8.5C5.784 20 4 18.216 4 16.25v-8.5C4 5.784 5.784 4 7.75 4zm8.75 1.5a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5zM12 7a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6z"/>
+        </svg>
 
-    </a>
+    </div>
 
+</a>
 
 </body>
 
