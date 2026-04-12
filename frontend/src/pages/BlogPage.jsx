@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -11,9 +11,19 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Fix Unsplash image URLs by appending size params
+const fixImageUrl = (url) => {
+  if (!url) return 'https://images.unsplash.com/photo-1665413793087-d58c23e3a177?w=800&q=80';
+  if (url.includes('unsplash.com') && !url.includes('?')) {
+    return `${url}?w=800&q=80`;
+  }
+  return url;
+};
+
 const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBlogs();
@@ -33,7 +43,7 @@ const BlogPage = () => {
   return (
     <div>
       <Navbar />
-      
+
       {/* Hero Section */}
       <div className="pt-24 pb-16 bg-gradient-to-br from-orange-50 via-amber-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -62,11 +72,15 @@ const BlogPage = () => {
                     className="group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-orange-200 overflow-hidden flex flex-col"
                   >
                     {/* Image */}
-                    <div className="relative h-56 overflow-hidden">
+                    <div className="relative h-56 overflow-hidden bg-orange-50">
                       <img
-                        src={post.image}
+                        src={fixImageUrl(post.image)}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1665413793087-d58c23e3a177?w=800&q=80';
+                        }}
                       />
                       <div className="absolute top-4 left-4">
                         <Badge className="bg-orange-600 text-white border-0">
@@ -102,6 +116,7 @@ const BlogPage = () => {
                       <Button
                         variant="ghost"
                         className="w-full text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                        onClick={() => navigate(`/blog/${post.id}`)}
                       >
                         Read Full Article
                         <ArrowRight size={16} className="ml-2" />
@@ -111,7 +126,6 @@ const BlogPage = () => {
                 ))}
               </div>
 
-              {/* Placeholder for more posts */}
               {blogs.length > 0 && (
                 <div className="mt-16 text-center">
                   <p className="text-gray-500 mb-4">More articles coming soon!</p>
