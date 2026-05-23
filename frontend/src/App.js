@@ -17,7 +17,7 @@ function App() {
         </Routes>
       </BrowserRouter>
 
-      {/* iOS Glass WhatsApp + Instagram Buttons */}
+      {/* iOS Glass Social Buttons */}
       <div
         style={{
           position: 'fixed',
@@ -30,7 +30,7 @@ function App() {
         }}
       >
 
-        {/* WhatsApp Button */}
+        {/* WhatsApp */}
         <a
           href="https://wa.me/message/LYXZX5D5BDVGM1"
           target="_blank"
@@ -51,9 +51,10 @@ function App() {
             justifyContent: 'center',
             position: 'relative',
             overflow: 'hidden',
+            textDecoration: 'none',
           }}
         >
-          {/* Glass Reflection */}
+          {/* Glass Shine */}
           <div
             style={{
               position: 'absolute',
@@ -79,9 +80,9 @@ function App() {
           />
         </a>
 
-        {/* Instagram Button */}
+        {/* Instagram */}
         <a
-          href="https://instagram.com/yourusername"
+          href="https://www.instagram.com/wegofers?igsh=MWdrYjlrbHpoZjRqeQ=="
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -100,9 +101,10 @@ function App() {
             justifyContent: 'center',
             position: 'relative',
             overflow: 'hidden',
+            textDecoration: 'none',
           }}
         >
-          {/* Glass Reflection */}
+          {/* Glass Shine */}
           <div
             style={{
               position: 'absolute',
