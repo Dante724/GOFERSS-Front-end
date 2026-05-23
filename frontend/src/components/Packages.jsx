@@ -1,146 +1,272 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Clock, IndianRupee, Check, Sparkles } from 'lucide-react';
-import BookingModal from './BookingModal';
+import { Clock, Users, Star, ChevronRight, Loader2, RefreshCw } from 'lucide-react';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const fallback = [
+  { id:1, name:'Kashi Darshan', description:'A sacred one-day tour through the holiest ghats, temples, and the legendary Ganga Aarti at dusk.', duration:'1 Day', groupSize:'Upto 10', price:1999, emoji:'🌅' },
+  { id:2, name:'Spiritual Immersion', description:'Three days of deep spiritual experiences — sunrise boat rides, temple tours, and evening aarti ceremonies.', duration:'3 Days', groupSize:'Upto 8', price:5499, emoji:'🕌', featured:true },
+  { id:3, name:'Banaras Heritage', description:'A week-long journey through the eternal city — silk weavers, sacred rituals, classical music, and more.', duration:'7 Days', groupSize:'Upto 6', price:12999, emoji:'🏰' },
+];
+
+const fetchWithRetry = async (url, retries = 5, delay = 4000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    if (i < retries - 1) await new Promise(r => setTimeout(r, delay));
+  }
+  return null;
+};
+
+const PackageCard = ({ pkg, onBook }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        borderRadius: '28px', overflow: 'hidden', position: 'relative',
+        background: pkg.featured
+          ? 'linear-gradient(145deg, #fff3e0, #ffe0b2)'
+          : 'linear-gradient(145deg, #fffbf5, #fff8ee)',
+        boxShadow: hovered
+          ? `0 28px 70px rgba(180,80,0,${pkg.featured?'0.28':'0.18'}), 0 4px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)`
+          : `0 ${pkg.featured?'14':'8'}px ${pkg.featured?'50':'30'}px rgba(180,80,0,${pkg.featured?'0.18':'0.1'}), 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)`,
+        transform: hovered ? 'translateY(-8px)' : pkg.featured ? 'translateY(-4px)' : 'translateY(0)',
+        transition: 'all 0.4s cubic-bezier(.34,1.56,.64,1)',
+        border: pkg.featured ? '1.5px solid rgba(234,88,12,0.25)' : '1px solid rgba(180,80,0,0.08)',
+      }}
+    >
+      {/* Top shine */}
+      <div style={{ position:'absolute', top:0, left:0, right:0, height:'45%', background:'linear-gradient(180deg,rgba(255,255,255,0.6) 0%,transparent 100%)', borderRadius:'28px 28px 0 0', pointerEvents:'none' }} />
+
+      {pkg.featured && (
+        <div style={{
+          position:'absolute', top:'20px', right:'20px', zIndex:2,
+          background:'linear-gradient(135deg,#ea580c,#f97316)',
+          color:'#fff', fontSize:'10px', fontWeight:'700', letterSpacing:'1.5px',
+          padding:'5px 14px', borderRadius:'100px', textTransform:'uppercase',
+          boxShadow:'0 4px 14px rgba(234,88,12,0.45)',
+          fontFamily:"'DM Sans',sans-serif",
+        }}>Most Popular</div>
+      )}
+
+      <div style={{ padding:'32px 32px 0' }}>
+        <div style={{
+          width:'70px', height:'70px', borderRadius:'22px', fontSize:'34px',
+          background:'rgba(255,255,255,0.7)',
+          boxShadow:'0 8px 24px rgba(180,80,0,0.15), inset 0 1px 0 rgba(255,255,255,0.9)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          marginBottom:'22px',
+        }}>{pkg.emoji || '✨'}</div>
+
+        <div style={{ display:'flex', gap:'3px', marginBottom:'12px' }}>
+          {[...Array(5)].map((_,i) => <Star key={i} size={13} fill="#f59e0b" color="#f59e0b"/>)}
+        </div>
+
+        <h3 style={{ fontFamily:"'Playfair Display',serif", color:'#1a0f00', fontSize:'24px', fontWeight:'700', margin:'0 0 10px', lineHeight:1.25 }}>{pkg.name || pkg.title}</h3>
+        <p style={{ color:'#78400a', fontSize:'15px', lineHeight:1.7, fontFamily:"'DM Sans',sans-serif", fontWeight:'300', margin:'0 0 22px' }}>{pkg.description}</p>
+
+        <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'24px' }}>
+          {pkg.duration && (
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'rgba(255,255,255,0.6)', padding:'6px 14px', borderRadius:'100px', fontSize:'13px', color:'#5c3a1e', fontFamily:"'DM Sans',sans-serif", boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+              <Clock size={13} color="#ea580c"/>{pkg.duration}
+            </div>
+          )}
+          {pkg.groupSize && (
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'rgba(255,255,255,0.6)', padding:'6px 14px', borderRadius:'100px', fontSize:'13px', color:'#5c3a1e', fontFamily:"'DM Sans',sans-serif", boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+              <Users size={13} color="#ea580c"/>{pkg.groupSize}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding:'0 32px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'16px' }}>
+        {pkg.price && (
+          <div>
+            <div style={{ fontSize:'11px', color:'#a06030', letterSpacing:'1.5px', textTransform:'uppercase', fontFamily:"'DM Sans',sans-serif", marginBottom:'2px' }}>Starting from</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'28px', fontWeight:'700', color:'#ea580c', lineHeight:1 }}>
+              ₹{typeof pkg.price==='number' ? pkg.price.toLocaleString('en-IN') : pkg.price}
+            </div>
+          </div>
+        )}
+        <button
+          onClick={onBook}
+          style={{
+            display:'flex', alignItems:'center', gap:'8px',
+            background: pkg.featured ? 'linear-gradient(135deg,#c2410c,#f97316)' : 'rgba(255,255,255,0.7)',
+            color: pkg.featured ? 'white' : '#ea580c',
+            border: pkg.featured ? 'none' : '1.5px solid rgba(234,88,12,0.3)',
+            padding:'13px 24px', borderRadius:'50px',
+            fontSize:'14px', fontFamily:"'DM Sans',sans-serif", fontWeight:'600',
+            cursor:'pointer', transition:'all 0.3s ease',
+            boxShadow: pkg.featured
+              ? '0 6px 20px rgba(234,88,12,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+              : '0 4px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform='scale(1.04)'}
+          onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
+        >
+          Book Now <ChevronRight size={14}/>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const SkeletonCard = () => (
+  <div style={{
+    borderRadius:'28px', overflow:'hidden',
+    background:'linear-gradient(145deg,#fffbf5,#fff8ee)',
+    boxShadow:'0 8px 30px rgba(180,80,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+    border:'1px solid rgba(180,80,0,0.07)', padding:'32px',
+  }}>
+    <style>{`
+      @keyframes shimmer {
+        0% { background-position: -400px 0; }
+        100% { background-position: 400px 0; }
+      }
+      .skel {
+        background: linear-gradient(90deg, #f0e8df 25%, #fdf0e8 50%, #f0e8df 75%);
+        background-size: 800px 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 12px;
+      }
+    `}</style>
+    <div className="skel" style={{ width:'70px', height:'70px', borderRadius:'22px', marginBottom:'22px' }}/>
+    <div className="skel" style={{ width:'40%', height:'12px', marginBottom:'14px' }}/>
+    <div className="skel" style={{ width:'75%', height:'22px', marginBottom:'12px', borderRadius:'8px' }}/>
+    <div className="skel" style={{ width:'100%', height:'14px', marginBottom:'8px' }}/>
+    <div className="skel" style={{ width:'85%', height:'14px', marginBottom:'8px' }}/>
+    <div className="skel" style={{ width:'60%', height:'14px', marginBottom:'24px' }}/>
+    <div style={{ display:'flex', gap:'10px', marginBottom:'24px' }}>
+      <div className="skel" style={{ width:'80px', height:'32px', borderRadius:'100px' }}/>
+      <div className="skel" style={{ width:'90px', height:'32px', borderRadius:'100px' }}/>
+    </div>
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+      <div className="skel" style={{ width:'100px', height:'36px', borderRadius:'10px' }}/>
+      <div className="skel" style={{ width:'110px', height:'44px', borderRadius:'50px' }}/>
+    </div>
+  </div>
+);
 
 const Packages = () => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPackage, setSelectedPackage] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [usedFallback, setUsedFallback] = useState(false);
 
-  useEffect(() => {
-    fetchPackages();
-  }, []);
+  const loadPackages = async () => {
+    setLoading(true);
+    setRetrying(false);
+    setUsedFallback(false);
+    setAttempt(0);
 
-  const fetchPackages = async () => {
-    try {
-      const response = await axios.get(`${API}/packages`);
-      setPackages(response.data);
-    } catch (error) {
-      console.error('Error fetching packages:', error);
-    } finally {
+    const tryFetch = async (retries = 5, delay = 4000) => {
+      for (let i = 0; i < retries; i++) {
+        setAttempt(i + 1);
+        if (i > 0) setRetrying(true);
+        try {
+          const res = await fetch('/api/packages');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              setPackages(data);
+              setLoading(false);
+              setRetrying(false);
+              return;
+            }
+          }
+        } catch (e) {}
+        if (i < retries - 1) await new Promise(r => setTimeout(r, delay));
+      }
+      setPackages(fallback);
+      setUsedFallback(true);
       setLoading(false);
-    }
+      setRetrying(false);
+    };
+
+    await tryFetch();
   };
 
-  const handleBookNow = (pkg) => {
-    setSelectedPackage(pkg);
-    setIsModalOpen(true);
-  };
-
-  if (loading) {
-    return (
-      <section id="packages" className="py-20 bg-gradient-to-b from-orange-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-600">Loading packages...</p>
-        </div>
-      </section>
-    );
-  }
+  useEffect(() => { loadPackages(); }, []);
 
   return (
-    <section id="packages" className="py-20 bg-gradient-to-b from-orange-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-300">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Our Offerings
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Sacred Journey Packages
+    <section id="packages" style={{ background:'linear-gradient(180deg,#fdf6ed 0%,#fff8f0 100%)', padding:'100px 0', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', bottom:'-100px', left:'-100px', width:'400px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle,rgba(251,191,36,0.07) 0%,transparent 70%)', pointerEvents:'none' }} />
+
+      <div style={{ maxWidth:'1200px', margin:'0 auto', padding:'0 32px' }}>
+        {/* Header */}
+        <div style={{ textAlign:'center', marginBottom:'64px' }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'rgba(234,88,12,0.08)', border:'1px solid rgba(234,88,12,0.18)', borderRadius:'100px', padding:'6px 18px', marginBottom:'18px' }}>
+            <span style={{ color:'#ea580c', fontSize:'11px', letterSpacing:'3px', textTransform:'uppercase', fontWeight:'600', fontFamily:"'DM Sans',sans-serif" }}>Curated for You</span>
+          </div>
+          <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:'clamp(30px,4vw,50px)', fontWeight:'700', color:'#1a0f00', margin:'0 0 16px' }}>
+            Sacred Journey <em style={{ color:'#ea580c', fontStyle:'italic' }}>Packages</em>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Carefully curated experiences to explore the spiritual heart of Varanasi
+          <p style={{ color:'#78400a', fontSize:'18px', fontFamily:"'DM Sans',sans-serif", fontWeight:'300', maxWidth:'480px', margin:'0 auto', lineHeight:1.7 }}>
+            Handcrafted experiences for every seeker — from a single sacred dawn to a full spiritual immersion.
           </p>
         </div>
 
-        {/* Package Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {packages.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className="group hover:shadow-2xl transition-all duration-300 border-2 border-orange-100 hover:border-orange-300 overflow-hidden"
-            >
-              {/* Package Image */}
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={pkg.image}
-                  alt={pkg.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        {/* Waking up notice */}
+        {retrying && (
+          <div style={{
+            display:'flex', alignItems:'center', justifyContent:'center', gap:'12px',
+            background:'linear-gradient(145deg,#fff7ed,#fde68a44)',
+            border:'1px solid rgba(234,88,12,0.2)', borderRadius:'16px',
+            padding:'14px 24px', marginBottom:'32px',
+            boxShadow:'0 4px 16px rgba(180,80,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+          }}>
+            <Loader2 size={18} color="#ea580c" style={{ animation:'spin 1s linear infinite' }}/>
+            <span style={{ color:'#92400e', fontSize:'14px', fontFamily:"'DM Sans',sans-serif", fontWeight:'500' }}>
+              Waking up our server... this takes a moment (attempt {attempt}/5)
+            </span>
+          </div>
+        )}
+
+        {/* Fallback notice */}
+        {usedFallback && !loading && (
+          <div style={{
+            display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px',
+            background:'linear-gradient(145deg,#fff7ed,#fde68a44)',
+            border:'1px solid rgba(234,88,12,0.2)', borderRadius:'16px',
+            padding:'14px 24px', marginBottom:'32px',
+            boxShadow:'0 4px 16px rgba(180,80,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+          }}>
+            <span style={{ color:'#92400e', fontSize:'14px', fontFamily:"'DM Sans',sans-serif" }}>
+              Showing sample packages — server is waking up.
+            </span>
+            <button onClick={loadPackages} style={{
+              display:'flex', alignItems:'center', gap:'6px',
+              background:'linear-gradient(135deg,#ea580c,#f97316)', color:'white',
+              border:'none', padding:'8px 18px', borderRadius:'50px',
+              fontSize:'12px', fontWeight:'600', cursor:'pointer',
+              fontFamily:"'DM Sans',sans-serif",
+              boxShadow:'0 4px 12px rgba(234,88,12,0.35)',
+            }}>
+              <RefreshCw size={13}/> Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))', gap:'28px' }}>
+          {loading
+            ? [1,2,3].map(i => <SkeletonCard key={i}/>)
+            : packages.map((p,i) => (
+                <PackageCard
+                  key={p._id||p.id||i}
+                  pkg={p}
+                  onBook={() => document.querySelector('#contact')?.scrollIntoView({ behavior:'smooth' })}
                 />
-                <div className="absolute top-4 right-4">
-                  <Badge className="bg-orange-600 text-white border-0 shadow-lg">
-                    {pkg.duration}
-                  </Badge>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-              </div>
-
-              <CardHeader>
-                <CardTitle className="text-2xl text-gray-900">{pkg.name}</CardTitle>
-                <CardDescription className="text-base text-gray-600 mt-2">
-                  {pkg.description}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {/* Price */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center text-3xl font-bold text-orange-600">
-                      <IndianRupee size={24} />
-                      {pkg.price}
-                    </div>
-                    {pkg.hasOptionalGhatWalk && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        With Ghat Walk: ₹{pkg.priceWithGhatWalk}
-                      </p>
-                    )}
-                  </div>
-                  <Clock className="text-gray-400" size={20} />
-                </div>
-
-                {/* Inclusions */}
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Inclusions:</h4>
-                  <ul className="space-y-2">
-                    {pkg.inclusions.map((item, idx) => (
-                      <li key={idx} className="flex items-start text-sm text-gray-700">
-                        <Check className="text-green-600 mr-2 flex-shrink-0" size={16} />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-
-              <CardFooter>
-                <Button
-                  onClick={() => handleBookNow(pkg)}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-6 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Book Now
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+              ))
+          }
         </div>
       </div>
 
-      {/* Booking Modal */}
-      <BookingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        package={selectedPackage}
-      />
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
     </section>
   );
 };
