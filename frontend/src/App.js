@@ -17,7 +17,7 @@ function App() {
         </Routes>
       </BrowserRouter>
 
-      {/* WhatsApp Logo */}
+      {/* Beautiful WhatsApp Logo */}
       <a
         href="https://wa.me/message/LYXZX5D5BDVGM1"
         target="_blank"
@@ -25,17 +25,28 @@ function App() {
         style={{
           position: 'fixed',
           right: '20px',
-          bottom: '90px',
+          bottom: '95px',
           zIndex: 1000,
+          width: '58px',
+          height: '58px',
+          borderRadius: '18px',
+          background:
+            'linear-gradient(135deg, #25D366, #1ebe5d)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow:
+            '0 0 20px rgba(37,211,102,0.5)',
+          border: '2px solid rgba(255,255,255,0.4)',
+          backdropFilter: 'blur(10px)',
         }}
       >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
           alt="WhatsApp"
           style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '50%',
+            width: '34px',
+            height: '34px',
           }}
         />
       </a>
