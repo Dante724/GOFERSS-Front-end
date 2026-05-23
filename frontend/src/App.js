@@ -17,39 +17,118 @@ function App() {
         </Routes>
       </BrowserRouter>
 
-      {/* Beautiful WhatsApp Logo */}
-      <a
-        href="https://wa.me/message/LYXZX5D5BDVGM1"
-        target="_blank"
-        rel="noopener noreferrer"
+      {/* iOS Glass WhatsApp + Instagram Buttons */}
+      <div
         style={{
           position: 'fixed',
           right: '20px',
-          bottom: '95px',
+          bottom: '25px',
           zIndex: 1000,
-          width: '58px',
-          height: '58px',
-          borderRadius: '18px',
-          background:
-            'linear-gradient(135deg, #25D366, #1ebe5d)',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow:
-            '0 0 20px rgba(37,211,102,0.5)',
-          border: '2px solid rgba(255,255,255,0.4)',
-          backdropFilter: 'blur(10px)',
+          flexDirection: 'column',
+          gap: '14px',
         }}
       >
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-          alt="WhatsApp"
+
+        {/* WhatsApp Button */}
+        <a
+          href="https://wa.me/message/LYXZX5D5BDVGM1"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
-            width: '34px',
-            height: '34px',
+            width: '72px',
+            height: '72px',
+            borderRadius: '24px',
+            background:
+              'linear-gradient(135deg, rgba(37,211,102,0.95), rgba(20,180,80,0.85))',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1.5px solid rgba(255,255,255,0.35)',
+            boxShadow:
+              '0 0 30px rgba(37,211,102,0.45), inset 0 1px 1px rgba(255,255,255,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
           }}
-        />
-      </a>
+        >
+          {/* Glass Reflection */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '5px',
+              left: '5px',
+              width: '80%',
+              height: '35%',
+              borderRadius: '18px',
+              background:
+                'linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0.05))',
+            }}
+          />
+
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+            alt="WhatsApp"
+            style={{
+              width: '36px',
+              height: '36px',
+              zIndex: 2,
+              filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.5))',
+            }}
+          />
+        </a>
+
+        {/* Instagram Button */}
+        <a
+          href="https://instagram.com/yourusername"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            width: '72px',
+            height: '72px',
+            borderRadius: '24px',
+            background:
+              'linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1.5px solid rgba(255,255,255,0.35)',
+            boxShadow:
+              '0 0 30px rgba(255,0,128,0.35), inset 0 1px 1px rgba(255,255,255,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Glass Reflection */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '5px',
+              left: '5px',
+              width: '80%',
+              height: '35%',
+              borderRadius: '18px',
+              background:
+                'linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0.05))',
+            }}
+          />
+
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+            alt="Instagram"
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '10px',
+              zIndex: 2,
+              filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.5))',
+            }}
+          />
+        </a>
+      </div>
 
       <Toaster />
     </div>
