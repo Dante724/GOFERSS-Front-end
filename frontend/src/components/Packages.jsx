@@ -1,22 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Users, Star, ChevronRight, Loader2, RefreshCw } from 'lucide-react';
 
-const fallback = [
-  { id:1, name:'Kashi Darshan', description:'A sacred one-day tour through the holiest ghats, temples, and the legendary Ganga Aarti at dusk.', duration:'1 Day', groupSize:'Upto 10', price:1999, emoji:'🌅' },
-  { id:2, name:'Spiritual Immersion', description:'Three days of deep spiritual experiences — sunrise boat rides, temple tours, and evening aarti ceremonies.', duration:'3 Days', groupSize:'Upto 8', price:5499, emoji:'🕌', featured:true },
-  { id:3, name:'Banaras Heritage', description:'A week-long journey through the eternal city — silk weavers, sacred rituals, classical music, and more.', duration:'7 Days', groupSize:'Upto 6', price:12999, emoji:'🏰' },
-];
+const FALLBACK_IMG = 'https://commons.wikimedia.org/wiki/Special:FilePath/Varanasi%20ghats%20at%20the%20sunrise.JPG?width=400';
 
-const fetchWithRetry = async (url, retries = 5, delay = 4000) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) return await res.json();
-    } catch (e) {}
-    if (i < retries - 1) await new Promise(r => setTimeout(r, delay));
-  }
-  return null;
-};
+// Clean fallback plans — your real packages, no emojis
+const fallback = [
+  {
+    id: 'pkg_001',
+    name: 'Kashi Spiritual Getaway',
+    description: 'Experience the spiritual heart of Kashi with VIP temple darshan, a peaceful boat ride on the Ganga, guided sightseeing, and a comfortable AC stay.',
+    duration: '2 Nights / 3 Days',
+    groupSize: 'Min 2 People',
+    price: 4999,
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Varanasi%20ghats%20at%20the%20sunrise.JPG?width=400',
+  },
+  {
+    id: 'pkg_002',
+    name: 'Kashi Complete Experience',
+    description: 'The complete spiritual and cultural beauty of Varanasi — premium AC stay, VIP temple visits, full sightseeing including Sarnath, and airport transfers.',
+    duration: '3 Nights / 4 Days',
+    groupSize: 'Min 2 People',
+    price: 6999,
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Evening%20Ganga%20Aarti%20at%20Dashashwamedh%20Ghat.JPG?width=400',
+    featured: true,
+  },
+  {
+    id: 'pkg_003',
+    name: 'Spiritual Triangle Package',
+    description: 'Visit the three holiest cities of Uttar Pradesh — Varanasi, Prayagraj, and Ayodhya — with comfortable stays, guided sightseeing, and seamless transfers.',
+    duration: '5 Days / 4 Nights',
+    groupSize: 'Min 2 People',
+    price: 12999,
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ganga%20Aarti%20at%20Dawn.jpg?width=400',
+  },
+  {
+    id: 'pkg_004',
+    name: 'Varanasi Sightseeing',
+    description: 'Explore the iconic temples, ghats, and heritage sites of Varanasi in a private AC vehicle with a knowledgeable local guide.',
+    duration: 'Full Day',
+    groupSize: 'As per vehicle',
+    price: 3500,
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Dhamek%20Stupa%20Sarnath%20WLM22-01571.jpg?width=400',
+  },
+];
 
 const PackageCard = ({ pkg, onBook }) => {
   const [hovered, setHovered] = useState(false);
@@ -53,12 +79,19 @@ const PackageCard = ({ pkg, onBook }) => {
 
       <div style={{ padding:'32px 32px 0' }}>
         <div style={{
-          width:'70px', height:'70px', borderRadius:'22px', fontSize:'34px',
+          width:'70px', height:'70px', borderRadius:'22px', overflow:'hidden',
           background:'rgba(255,255,255,0.7)',
           boxShadow:'0 8px 24px rgba(180,80,0,0.15), inset 0 1px 0 rgba(255,255,255,0.9)',
           display:'flex', alignItems:'center', justifyContent:'center',
           marginBottom:'22px',
-        }}>{pkg.emoji || '✨'}</div>
+        }}>
+          <img
+            src={pkg.image || FALLBACK_IMG}
+            alt={pkg.name || pkg.title || 'Package'}
+            style={{ width:'100%', height:'100%', objectFit:'cover' }}
+            onError={(e) => { e.currentTarget.src = FALLBACK_IMG; }}
+          />
+        </div>
 
         <div style={{ display:'flex', gap:'3px', marginBottom:'12px' }}>
           {[...Array(5)].map((_,i) => <Star key={i} size={13} fill="#f59e0b" color="#f59e0b"/>)}
@@ -221,33 +254,8 @@ const Packages = () => {
           }}>
             <Loader2 size={18} color="#ea580c" style={{ animation:'spin 1s linear infinite' }}/>
             <span style={{ color:'#92400e', fontSize:'14px', fontFamily:"'DM Sans',sans-serif", fontWeight:'500' }}>
-              Waking up our server... this takes a moment (attempt {attempt}/5)
+              Loading our latest packages...
             </span>
-          </div>
-        )}
-
-        {/* Fallback notice */}
-        {usedFallback && !loading && (
-          <div style={{
-            display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'12px',
-            background:'linear-gradient(145deg,#fff7ed,#fde68a44)',
-            border:'1px solid rgba(234,88,12,0.2)', borderRadius:'16px',
-            padding:'14px 24px', marginBottom:'32px',
-            boxShadow:'0 4px 16px rgba(180,80,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
-          }}>
-            <span style={{ color:'#92400e', fontSize:'14px', fontFamily:"'DM Sans',sans-serif" }}>
-              Showing sample packages — server is waking up.
-            </span>
-            <button onClick={loadPackages} style={{
-              display:'flex', alignItems:'center', gap:'6px',
-              background:'linear-gradient(135deg,#ea580c,#f97316)', color:'white',
-              border:'none', padding:'8px 18px', borderRadius:'50px',
-              fontSize:'12px', fontWeight:'600', cursor:'pointer',
-              fontFamily:"'DM Sans',sans-serif",
-              boxShadow:'0 4px 12px rgba(234,88,12,0.35)',
-            }}>
-              <RefreshCw size={13}/> Try Again
-            </button>
           </div>
         )}
 
